@@ -1,0 +1,25 @@
+import math
+
+def p_to_s(p_value):
+    """
+    Convert P-value to S-value (surprisal value).
+    
+    Parameters:
+    p_value (float): The P-value to be transformed.
+    
+    Returns:
+    float: The calculated S-value in bits.
+    """
+    # Ensure the P-value is within the valid range (0, 1]
+    if not 0 < p_value <= 1:
+        raise ValueError("P-value must be between 0 and 1.")
+    
+    # Calculate S-value using base-2 logarithm
+    s_value = -math.log2(p_value)
+    
+    return s_value
+
+# Example usage:
+p_example = 0.05
+s_example = p_to_s(p_example)
+print(f"The S-value for a P-value of {p_example} is {s_example} bits.")
