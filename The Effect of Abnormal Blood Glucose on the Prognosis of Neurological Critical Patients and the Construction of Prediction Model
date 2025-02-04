@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # The Effect of Abnormal Blood Glucose on the Prognosis of Neurological Critical Patients and the Construction of Prediction Model.R
-# [Yu Guo]
-# [2025/02]
+# Last Modified By: Yu Guo
+# Last Updated In: 2025/02
 # -----------------------------------------------------------------------------
 
 #1 Variance Inflation Factor Calculation
@@ -23,7 +23,7 @@ vif_df <- data.frame(
   VIF = as.numeric(vif_values)
 )
 
-print(vif_df)
+#print(vif_df)
 
 ggplot(vif_df, aes(x = Variable, y = VIF, fill = Variable)) +
   geom_bar(stat = "identity", width = 0.6) +
