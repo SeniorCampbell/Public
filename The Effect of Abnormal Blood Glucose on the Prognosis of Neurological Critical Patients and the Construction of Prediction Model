@@ -4,12 +4,14 @@
 # Last Updated In: 2025/02
 # -----------------------------------------------------------------------------
 
-#1 Variance Inflation Factor Calculation
+
+#{1. Variance Inflation Factor Calculation}
+
 library(car)
 library(readxl)
 library(ggplot2)
 
-file_path <- ""
+file_path <- " "
 data <- read_excel(file_path, sheet = 1)
 
 independent_vars <- data[, 3:ncol(data)]
@@ -23,17 +25,20 @@ vif_df <- data.frame(
   VIF = as.numeric(vif_values)
 )
 
-#print(vif_df)
+vif_df <- vif_df[order(vif_df$VIF), ]
 
-ggplot(vif_df, aes(x = Variable, y = VIF, fill = Variable)) +
+print(vif_df)
+
+ggplot(vif_df, aes(x = reorder(Variable, VIF), y = VIF, fill = Variable)) +
   geom_bar(stat = "identity", width = 0.6) +
+  geom_text(aes(label = round(VIF, 2)), vjust = -0.5, size = 4) +
   scale_fill_viridis_d() + 
-  geom_hline(yintercept = 5, linetype = "dashed", color = "red", linewidth = 1) +
-  geom_hline(yintercept = 10, linetype = "dashed", color = "blue", linewidth = 1) +
+  geom_hline(yintercept = 5, linetype = "dashed", color = "orange", linewidth = 1) +
+  geom_hline(yintercept = 10, linetype = "dashed", color = "red", linewidth = 1) +
   labs(
-    title = "VIF in Traumatic Brain Injury Patients",
-    x = "Variables",
-    y = "VIF",
+    title = "",
+    x = "",
+    y = "Variance Inflation Factor",
     caption = "Red dashed line: VIF = 5 (Possible multicollinearity)\nBlue dashed line: VIF = 10 (Strong multicollinearity present)"
   ) +
   theme_minimal() +
@@ -41,3 +46,60 @@ ggplot(vif_df, aes(x = Variable, y = VIF, fill = Variable)) +
     plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
+
+
+# {2. Least Absolute Shrinkage and Selection Operator Regression}
+
+library(glmnet)
+library(ggplot2)
+library(viridis)
+library(readxl)
+
+file_path <- " "  
+data <- read_excel(file_path, sheet = 1)
+
+dependent_var <- data[[1]]  
+independent_vars <- data[, 3:ncol(data)] 
+
+independent_matrix <- as.matrix(independent_vars)
+
+lasso_model <- glmnet(independent_matrix, dependent_var, alpha = 1)
+
+plot(lasso_model, xvar = "lambda", label = TRUE, col = viridis(ncol(independent_matrix)), lwd = 2)
+abline(h = 0, lty = 2, col = "gray")  
+title("")
+legend("topright", legend = colnames(independent_matrix), col = viridis(ncol(independent_matrix)), lty = 1, cex = 1)
+
+set.seed(1) 
+cv_lasso <- cv.glmnet(independent_matrix, dependent_var, alpha = 1)
+
+plot(cv_lasso)
+title("")
+
+optimal_lambda <- cv_lasso$lambda.min
+text(log(optimal_lambda), max(cv_lasso$cvm), labels = paste("Optimal Lambda =", round(optimal_lambda, 4)), pos = 2, col = "darkorange") 
+optimal_coef <- coef(cv_lasso, s = optimal_lambda)
+
+coef_df <- data.frame(
+  Variable = rownames(optimal_coef)[-1],  
+  Coefficient = as.numeric(optimal_coef[-1])  
+)
+
+coef_df$AbsCoefficient <- abs(coef_df$Coefficient) 
+coef_df <- coef_df[order(coef_df$AbsCoefficient), ]  
+
+ggplot(coef_df, aes(x = reorder(Variable, AbsCoefficient), y = AbsCoefficient, fill = Variable)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  geom_text(aes(label = round(Coefficient, 4)), vjust = -0.5, size = 4, color = "black")+
+  scale_fill_viridis(discrete = TRUE) +  
+  labs(
+    title = "",
+    x = "",
+    y = "Abs-Coefficients"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
