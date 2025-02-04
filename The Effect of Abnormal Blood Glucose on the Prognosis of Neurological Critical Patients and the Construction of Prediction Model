@@ -1,8 +1,8 @@
-# -----------------------------------------------------------------------------
+# ------------------------- #
 # The Effect of Abnormal Blood Glucose on the Prognosis of Neurological Critical Patients and the Construction of Prediction Model.R
 # Last Modified By: Yu Guo
 # Last Updated In: 2025/02
-# -----------------------------------------------------------------------------
+# ------------------------- #
 
 
 #{1. Variance Inflation Factor Calculation}
